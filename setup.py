@@ -68,7 +68,7 @@ setup(
     long_description=readme_text,
     long_description_content_type="text/markdown",
     license=license,
-    install_requires=["huggingface", "loguru", "aisuite[all]", "scipy", "tqdm", "datasets"],
+    install_requires=["huggingface", "loguru", "scipy", "tqdm", "datasets"],
     package_data={"luq": ["README.md"]},
     packages=find_packages(),
 )
