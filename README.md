@@ -6,6 +6,11 @@
 Language Models Uncertainty Quantification (LUQ)
 </h3>
 
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1ThUAboQQYgM5kJ0dCtwozSkC6WzW0GdE?usp=drive_link)
+[![Pypi version](https://img.shields.io/pypi/v/luq)](https://pypi.org/project/luq/)
+[![unit-tests](https://github.com/AlexanderVNikitin/luq/actions/workflows/test.yml/badge.svg?event=push)](https://github.com/AlexanderVNikitin/luq/actions?query=workflow%3ATests+branch%3Amain)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/release/python-3100/)
+
 ## Get Started
 
 ### Install LUQ:

@@ -2,3 +2,4 @@ pytest
 huggingface
 datasets
 tqdm
+flake8
