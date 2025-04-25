@@ -68,7 +68,9 @@ setup(
     long_description=readme_text,
     long_description_content_type="text/markdown",
     license=license,
-    install_requires=["huggingface", "loguru", "scipy", "tqdm", "datasets"],
+    install_requires=[
+        "huggingface",
+        "transformers", "torch", "loguru", "scikit-learn", "scipy", "tqdm", "datasets", "openai"],
     package_data={"luq": ["README.md"]},
     packages=find_packages(),
 )

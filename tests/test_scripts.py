@@ -1,8 +1,13 @@
 import pytest
 from unittest.mock import patch, MagicMock, mock_open
-from scripts.upload_dataset import parse_args, load_json_dataset, upload_to_hub, main
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'scripts')))
+
+from upload_dataset import parse_args, load_json_dataset, upload_to_hub, main
 import json
-from scripts.add_generations_to_dataset import (
+
+from add_generations_to_dataset import (
     read_questions_and_answers,
     generate_samples,
     write_samples_to_file,
@@ -19,7 +24,7 @@ def test_parse_args(monkeypatch):
 
 
 def test_load_json_dataset():
-    with patch("scripts.upload_dataset.GenerationDataset") as mock_dataset:
+    with patch("upload_dataset.GenerationDataset") as mock_dataset:
         mock_instance = mock_dataset.return_value
         dataset = load_json_dataset("dataset.json")
         mock_dataset.assert_called_once_with("dataset.json")
@@ -28,7 +33,7 @@ def test_load_json_dataset():
 
 def test_upload_to_hub():
     mock_dataset = MagicMock()
-    with patch("scripts.upload_dataset.login") as mock_login:
+    with patch("upload_dataset.login") as mock_login:
         upload_to_hub(mock_dataset, "user/dataset", "fake_token")
         mock_login.assert_called_once_with(token="fake_token")
         mock_dataset.push_to_hub.assert_called_once_with(
@@ -37,14 +42,14 @@ def test_upload_to_hub():
 
 
 def test_main():
-    with patch("scripts.upload_dataset.parse_args") as mock_parse_args, patch(
-        "scripts.upload_dataset.os.path.exists", return_value=True
+    with patch("upload_dataset.parse_args") as mock_parse_args, patch(
+        "upload_dataset.os.path.exists", return_value=True
     ) as mock_exists, patch(
-        "scripts.upload_dataset.load_json_dataset"
+        "upload_dataset.load_json_dataset"
     ) as mock_load_dataset, patch(
-        "scripts.upload_dataset.upload_to_hub"
+        "upload_dataset.upload_to_hub"
     ) as mock_upload, patch(
-        "scripts.upload_dataset.logger.info"
+        "upload_dataset.logger.info"
     ) as mock_logger:
         mock_parse_args.return_value = MagicMock(
             path="dataset.json", repo_id="user/dataset", token="fake_token"
