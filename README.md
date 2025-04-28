@@ -10,6 +10,7 @@ Language Models Uncertainty Quantification (LUQ)
 [![Pypi version](https://img.shields.io/pypi/v/luq)](https://pypi.org/project/luq/)
 [![unit-tests](https://github.com/AlexanderVNikitin/luq/actions/workflows/test.yml/badge.svg?event=push)](https://github.com/AlexanderVNikitin/luq/actions?query=workflow%3ATests+branch%3Amain)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/release/python-3100/)
+[![codecov](https://codecov.io/gh/AlexanderVNikitin/luq/graph/badge.svg?token=ORX9NHH5ZU)](https://codecov.io/gh/AlexanderVNikitin/luq)
 
 ## Get Started
 
