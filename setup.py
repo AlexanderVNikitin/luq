@@ -42,7 +42,7 @@ classifiers = [
 
 install_requires = [
     "requests>=2.25.1",
-    "numpy>=1.21.0",
+    "numpy>=1.21.0,<1.25.0", # I have to constrain this to be "numpy>=1.17.3,<1.25.0" on my local machine (scipy conflict)
 ]
 
 
