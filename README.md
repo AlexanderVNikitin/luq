@@ -40,6 +40,10 @@ mp_estimator = MaxProbabilityEstimator()
 print(mp_estimator.estimate_uncertainty(samples))
 ```
 
+## Tutorials
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1ThUAboQQYgM5kJ0dCtwozSkC6WzW0GdE?usp=sharing) Introductory Tutorial [Getting started with LUQ](https://github.com/AlexanderVNikitin/luq/tutorials/getting_started.ipynb)
+
+
 ## Uncertainty Quantification Methods
 Generally the uncertainty quantification in LUQ sample multiple responses from an LLM and analyse the
 
