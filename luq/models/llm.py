@@ -1,7 +1,12 @@
 from dataclasses import dataclass
 import typing as T
 import torch
+import functools
+import httpx
 import transformers
+from openai import OpenAI
+import anthropic
+from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
 
 
 @dataclass
@@ -81,6 +86,68 @@ class HFLLMWrapper(LLMWrapper):
             answer=generated_text,
             logprobs=torch.tensor(logprobs, device=self.model.device),
         )
+    
+def update_base_url(request: httpx.Request, openai_endpoint_url: str) -> None:
+    if request.url.path == "/chat/completions":
+        request.url = request.url.copy_with(path=aalto_openai_endpoint_url)
+
+
+class AzureCustomGPT4Wrapper:
+    def __init__(self, openai_endpoint_url, api_key):
+        self.aalto_openai_endpoint_url = openai_endpoint_url
+        self.client = OpenAI(
+            base_url=openai_endpoint_url,
+            api_key=False,
+            default_headers = {
+                "Ocp-Apim-Subscription-Key": api_key,
+            },
+            http_client=httpx.Client(
+                event_hooks={ "request": [functools.partial(update_base_url, openai_endpoint_url=openai_endpoint_url)] }
+            ),
+        )
+    
+    def __call__(self, input: str) -> LLMOutput:
+        kwargs = {
+            "model": "no_effect",  # Replace with your actual deployment name
+            "logprobs": True,
+            "messages": [{"role": "user", "content": input}],
+            "top_logprobs": 5,
+        }
+        response = self.client.chat.completions.create(**kwargs)
+        content = response.choices[0].message.content
+        token_logprobs = response.choices[0].logprobs.token_logprobs
+        if token_logprobs is not None:
+            logprobs_tensor = torch.tensor(token_logprobs, dtype=torch.float32)
+        else:
+            logprobs_tensor = None
+        return LLMOutput(answer=content, logprobs=logprobs_tensor)
+    
+
+class ClaudeWrapper:
+    def __init__(self, api_key: str):
+        self.client = Anthropic(api_key=api_key)
+
+    def __call__(self, prompt: str, model: str = "claude-3-opus-20240229", temperature=1.0, max_tokens: int = 1024) -> LLMOutput:
+        """
+        Generates a response from Claude with optional logprobs.
+        """
+        # Anthropic API does not currently support logprobs in the chat API.
+        try:
+            response = self.client.messages.create(
+                model=model,
+                max_tokens=max_tokens,
+                messages=[
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=temperature,
+            )
+
+            # Extract text response
+            text = response.content[0].text if response.content else ""
+            return LLMOutput(answer=text)
+
+        except Exception as e:
+            raise RuntimeError(f"Claude API call failed: {e}")
 
 
 class BatchLLMWrapper:
