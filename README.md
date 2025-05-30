@@ -41,7 +41,7 @@ print(mp_estimator.estimate_uncertainty(samples))
 ```
 
 ## Tutorials
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1ThUAboQQYgM5kJ0dCtwozSkC6WzW0GdE?usp=sharing) Introductory Tutorial [Getting started with LUQ](https://github.com/AlexanderVNikitin/luq/tutorials/getting_started.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/alexandervnikitin/luq/blob/main/tutorials/getting_started.ipynb) Introductory Tutorial [Getting started with LUQ](https://github.com/AlexanderVNikitin/luq/tutorials/getting_started.ipynb)
 
 
 ## Uncertainty Quantification Methods
@@ -103,13 +103,20 @@ python scripts/upload_dataset.py \
     --token your-huggingface-token
 ```
 
-## Datasets end-to-end
-In order to generate a dataset:
-```python
-python scripts/gen_dataset.py --input-file=./data/dummy_data/raw_dummy.json --output-file=./output.json
+## Contributing
+We appreciate all contributions. To learn more, please check [CONTRIBUTING.md](CONTRIBUTING.md).
+
+Install from sources:
+```bash
+git clone github.com/AlexanderVNikitin/luq
+cd luq
+pip install -e .
 ```
 
-When a dataset is created we can augment it with accuracies checked by another LLM:
-```python
-python scripts/eval_accuracy.py --input-file ./output.json --output-file test.json --model-name=gpt2 --model-type=huggingface
+Run tests:
+```bash
+python -m pytest
 ```
+
+## License
+[MIT](LICENSE)

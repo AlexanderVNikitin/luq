@@ -30,7 +30,31 @@ def process_coqa(input_file: Path) -> Dict[str, List[Dict[str, str]]]:
 
 def process_nq(input_file: Path) -> Dict[str, List[Dict[str, str]]]:
     """Process Natural Questions dataset into standardized format."""
-    pass
+    result = {}
+    nq = load_dataset("natural_questions", cache_dir=str(input_file))
+
+    for split in ["train", "validation"]:
+        cur_data = nq[split]
+        result[split] = []
+        for sample in cur_data:
+            question = sample["question"]
+            context = sample["document"]["text"] if "document" in sample else sample.get("context", "")
+            answers = sample.get("answers", [])
+            # Natural Questions can have multiple answers; we take the first if available
+            if answers:
+                answer = answers[0]
+            else:
+                continue  # skip if no answer
+
+            full_question = f"{context}\n{question}"
+            result[split].append(
+                {
+                    "question": full_question,
+                    "gt_answer": answer,
+                }
+            )
+
+    return result
 
 
 def process_bioasq(input_file: Path) -> Dict[str, List[Dict[str, str]]]:
