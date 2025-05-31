@@ -20,12 +20,31 @@ dtype_map = {
 
 
 class SeqProbMode(Enum):
+    """
+    Enumeration for modes of combining token probabilities in a sequence.
+
+    Attributes:
+        PROD: Use the product of probabilities.
+        AVG: Use the average of probabilities.
+    """
     PROD = "prod"
     AVG = "avg"
 
 
 def entropy(probabilities: Union[List[float], torch.Tensor]) -> torch.Tensor:
-    """Compute entropy for a sequence of probabilities."""
+    """
+    Computes the entropy of a probability distribution.
+
+    Args:
+        probabilities (Union[List[float], torch.Tensor]): A list or tensor of probabilities.
+            The probabilities should sum to 1 and represent a valid distribution.
+
+    Returns:
+        torch.Tensor: The computed entropy as a scalar tensor value.
+
+    Notes:
+        Adds a small epsilon (1e-9) to probabilities to avoid log(0).
+    """
     probabilities = (
         torch.tensor(probabilities, dtype=torch.float32)
         if isinstance(probabilities, list)

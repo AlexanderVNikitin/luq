@@ -36,6 +36,24 @@ To run linters, use:
 flake8 luq/
 ```
 
+### Pre-commit hooks
+To ensure code quality checks run automatically before each commit, install and use the `.pre-commit hooks`.
+
+1. Install pre-commit:
+```bash
+pip install pre-commit
+```
+
+2. Install the hooks defined in `.pre-commit-config.yaml`.
+```bash
+pre-commit install
+```
+
+3. To run all pre-commit hooks manually on all files:
+```bash
+pre-commit run --all-files
+```
+
 ## Documenting
 We aim to produce high-quality documentation to help our users to use the library. In your contribution, please edit corresponding documentation pages in [./docs](https://github.com/AlexanderVNikitin/luq/tree/main/docs).
 

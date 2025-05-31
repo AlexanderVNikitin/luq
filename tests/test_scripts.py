@@ -1,16 +1,19 @@
 import pytest
 from unittest.mock import patch, MagicMock, mock_open
 import sys
+import tempfile
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'scripts')))
 
-from upload_dataset import parse_args, load_json_dataset, upload_to_hub, main
+from upload_dataset import parse_args, load_json_dataset, upload_to_hub
+from upload_dataset import main as main_upload
 import json
 
 from add_generations_to_dataset import (
     read_questions_and_answers,
     generate_samples,
     write_samples_to_file,
+    main
 )
 
 
@@ -56,7 +59,7 @@ def test_main():
         )
         mock_load_dataset.return_value = MagicMock()
 
-        main()
+        main_upload()
 
         mock_exists.assert_called_once_with("dataset.json")
         mock_load_dataset.assert_called_once_with("dataset.json")
@@ -123,3 +126,73 @@ def test_write_samples_to_file_failure():
     with patch("builtins.open", side_effect=PermissionError):
         with pytest.raises(PermissionError):
             write_samples_to_file([], {}, "output.json")
+
+
+@pytest.fixture
+def mock_data():
+    return {
+        "train": [
+            {"question": "What is the capital of France?", "gt_answer": "Paris"},
+            {"question": "What is 2 + 2?", "gt_answer": "4"},
+        ]
+    }
+
+
+@patch("transformers.AutoTokenizer.from_pretrained")
+@patch("transformers.AutoModelForCausalLM.from_pretrained")
+@patch("add_generations_to_dataset.read_questions_and_answers")
+@patch("add_generations_to_dataset.write_samples_to_file")
+def test_add_generations_to_dataset_main(
+    mock_write,
+    mock_read,
+    mock_model_cls,
+    mock_tokenizer_cls,
+    mock_data
+):
+    # Prepare mock tokenizer
+    mock_tokenizer = MagicMock()
+    mock_tokenizer.return_tensors = "pt"
+    mock_tokenizer.encode.return_value = [0]
+    mock_tokenizer.decode.return_value = "sampled text"
+    mock_tokenizer_cls.return_value = mock_tokenizer
+
+    # Prepare mock model
+    mock_model = MagicMock()
+    mock_model.generate.return_value = [[0, 1, 2]]
+    mock_model.device = "cpu"
+    mock_model.config.max_position_embeddings = 10
+    mock_model_cls.return_value = mock_model
+
+    # Mock read input data
+    mock_read.return_value = mock_data
+
+    # Use a temporary output file
+    with tempfile.NamedTemporaryFile(suffix=".json") as tmpfile:
+        main(
+            input_file="dummy_input.json",
+            output_file=tmpfile.name,
+            num_samples=1,
+            num_questions=1,
+            model_name="gpt2",
+            temperature=1.0,
+            temperature_answer=0.1,
+            top_p=0.9,
+            top_k=25,
+            torch_dtype="float16",
+            device=-1,
+        )
+
+        # Assertions
+        assert mock_read.called
+        assert mock_tokenizer_cls.called
+        assert mock_model_cls.called
+        assert mock_write.called
+
+        # Verify structure of the written data
+        args, kwargs = mock_write.call_args
+        output_data = args[0]  # samples
+        output_params = args[1]  # parameters
+
+        assert "train" in output_data
+        assert isinstance(output_data["train"], list)
+        assert output_params["model_name"] == "gpt2"
