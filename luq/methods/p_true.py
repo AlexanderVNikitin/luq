@@ -6,12 +6,18 @@ from luq.utils import SeqProbMode
 
 
 class PTrueEstimator(BaseUQModel):
+    """Uncertainty estimator based on P(true) metric.
+
+    This estimator constructs a prompt that asks an LLM to assess the truthfulness of a given
+    answer compared to brainstormed alternatives, then uses the model's response to estimate
+    uncertainty.
+    """
+
     def __init__(self, llm: LLMWrapper):
-        """
-        Initialize P(true) estimator for uncertainty quantification.
+        """Initialize the P(true) estimator.
 
         Args:
-            llm: LLM wrapper for making predictions
+            llm (LLMWrapper): Wrapper around a language model used for generating predictions.
         """
         super().__init__()
         self.llm = llm
@@ -23,7 +29,21 @@ class PTrueEstimator(BaseUQModel):
         brainstormed_answers: T.List[str],
         hint: bool = False,
     ) -> str:
-        """Construct prompt for P(true) uncertainty metric."""
+        """Construct a prompt for the P(true) uncertainty estimation task.
+
+        This prompt asks the language model to evaluate whether the most probable answer
+        aligns with a set of brainstormed answers.
+
+        Args:
+            question (str): The original input question.
+            most_probable_answer (str): The most likely answer as determined by the model.
+            brainstormed_answers (List[str]): Other generated answers used for comparison.
+            hint (bool, optional): If True, include more explicit instructions in the prompt.
+                Defaults to False.
+
+        Returns:
+            str: A formatted prompt string suitable for LLM input.
+        """
         prompt = f"Question: {question}\nBrainstormed Answers: "
         for answer in brainstormed_answers + [most_probable_answer]:
             prompt += f"{answer.strip()}\n"
@@ -46,11 +66,21 @@ class PTrueEstimator(BaseUQModel):
         hint: bool = False,
         **kwargs,
     ) -> float:
-        """
-        Estimate uncertainty using P(true) framework: sampling multiple questions and asking whether a final answer supported by those samples. Then estimate probability that the answer is matched.
+        """Estimate uncertainty using the P(true) approach.
 
-        Returns P(true) score as uncertainty measure.
-        Lower P(true) indicates higher uncertainty.
+        The method selects the most probable answer from samples and constructs a prompt
+        to ask the model whether that answer is supported by alternative answers (brainstormed).
+        The returned uncertainty is derived from the model's belief in the answer's truthfulness.
+
+        Args:
+            samples (LLMSamples): Samples of generated answers from the language model.
+            most_probable_answer (LLMOutput, optional): Precomputed most probable answer. If not provided,
+                it will be inferred from the samples.
+            hint (bool, optional): If True, include hint-style prompt formatting. Defaults to False.
+            **kwargs: Additional keyword arguments. Expects `question` (str) to be passed here.
+
+        Returns:
+            float: The 1 - P(true) score. Higher values indicate greater uncertainty; lower values imply less uncertainty.
         """
         if most_probable_answer is None:
             # Get most probable answer (answer with highest logprobs)
@@ -79,15 +109,15 @@ class PTrueEstimator(BaseUQModel):
 
         # Calculate negative log likelihood of response
         if response.answer == "A":
-            return self.compute_sequence_probability(
+            return 1 - self.compute_sequence_probability(
                 response.logprobs, seq_prob_mode=SeqProbMode.PROD
             )
         elif response.answer == "B":
-            return 1 - self.compute_sequence_probability(
+            return self.compute_sequence_probability(
                 response.logprobs, seq_prob_mode=SeqProbMode.PROD
             )
         else:
             logger.error(
                 f"LLM has responded {response.answer}, should be either A or B. Return p(true) = 0"
             )
-            return 0
+            return 1

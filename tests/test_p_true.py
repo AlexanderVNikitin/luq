@@ -44,5 +44,5 @@ def test_estimate_uncertainty(p_true_estimator, mock_samples):
     uncertainty = p_true_estimator.estimate_uncertainty(
         mock_samples, question="Test question?"
     )
-    gt_uncertainty = torch.prod(torch.exp(p_true_estimator.llm.probs)).item()
+    gt_uncertainty = 1 - torch.prod(torch.exp(p_true_estimator.llm.probs)).item()
     assert uncertainty == gt_uncertainty

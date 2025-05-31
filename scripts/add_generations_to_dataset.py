@@ -5,24 +5,65 @@ from tqdm import tqdm
 from loguru import logger
 from transformers import pipeline
 from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import PreTrainedTokenizer, PreTrainedModel
+from typing import Dict, List
 
 import luq.utils
 
 
-def read_questions_and_answers(file_path):
-    """Reads questions and answers from a JSON file."""
+def read_questions_and_answers(file_path: str) -> Dict:
+    """Reads questions and answers from a JSON file.
+
+    Args:
+        file_path (str): The path to the JSON file containing questions and answers.
+
+    Returns:
+        list or dict: The parsed content of the JSON file, typically a list or dictionary,
+        depending on the structure of the JSON.
+
+    Raises:
+        IOError: If the file cannot be read or the contents cannot be parsed as JSON.
+    """
     try:
         with open(file_path, "r") as file:
             data = json.load(file)
         logger.info(f"Successfully read {len(data)} question(s) from {file_path}.")
         return data
-    except Exception as e:
+    except IOError as e:
         logger.error(f"Failed to read the file {file_path}: {e}")
         raise
 
 
-def generate_samples(tokenizer, model, prompt, num_samples, temperature, top_p, top_k):
-    """Generate samples one by one using Hugging Face model and tokenizer to reduce memory usage."""
+def generate_samples(
+        tokenizer: PreTrainedTokenizer,
+        model: PreTrainedModel,
+        prompt: str,
+        num_samples: int,
+        temperature: float,
+        top_p: float,
+        top_k: int
+    ) -> List[str]:
+    """Generate text samples one by one using a Hugging Face model and tokenizer.
+
+    This function generates `num_samples` sequences conditioned on the input
+    `prompt`, using sampling with temperature, nucleus sampling (top_p), and top-k
+    filtering. It processes each sample individually to reduce memory usage.
+
+    Args:
+        tokenizer (PreTrainedTokenizer): Tokenizer used to encode and decode text.
+        model (PreTrainedModel): Pretrained model used for generation.
+        prompt (str): The input text prompt to condition generation on.
+        num_samples (int): Number of samples to generate.
+        temperature (float): Sampling temperature; higher values increase diversity.
+        top_p (float): Cumulative probability for nucleus sampling.
+        top_k (int): Number of highest probability tokens to keep for top-k sampling.
+
+    Returns:
+        List[str]: A list of generated text samples as strings.
+
+    Raises:
+        ValueError: If generation fails due to invalid input or model issues.
+    """
     try:
         input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(model.device)
         samples = []
@@ -42,19 +83,32 @@ def generate_samples(tokenizer, model, prompt, num_samples, temperature, top_p, 
         logger.info(f"Generated {num_samples} sample(s) for prompt: {prompt}")
         return samples
 
-    except Exception as e:
+    except ValueError as e:
         logger.error(f"Error generating samples: {e}")
         raise
 
 
-def write_samples_to_file(samples, parameters, output_file):
-    """Write generated samples to a file."""
+def write_samples_to_file(samples: List[str], parameters: Dict, output_file: str) -> None:
+    """Write generated samples and their parameters to a JSON file.
+
+    Saves the generated samples along with the generation parameters into
+    a JSON file specified by `output_file`. The data is saved under the keys
+    "data" for samples and "parameters" for the associated metadata.
+
+    Args:
+        samples (list): A list of generated text samples to write.
+        parameters (dict): A dictionary of parameters used to generate the samples.
+        output_file (str): Path to the output JSON file.
+
+    Raises:
+        IOError: If there is an error writing to the file.
+    """
     try:
         result = {"data": samples, "parameters": parameters}
         with open(output_file, "w") as file:
             json.dump(result, file, indent=4)
         logger.info(f"Successfully wrote {len(samples)} samples to {output_file}.")
-    except Exception as e:
+    except IOError as e:
         logger.error(f"Failed to write samples to {output_file}: {e}")
         raise
 

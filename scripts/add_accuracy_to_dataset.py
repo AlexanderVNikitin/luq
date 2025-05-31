@@ -7,7 +7,34 @@ from luq.evals.accuracy_eval import AccuracyEvaluator
 def evaluate_dataset(
     input_file: str, output_file: str, model_name: str, model_type: str
 ):
-    """Evaluate accuracy of generated answers and save results."""
+    """
+    Evaluates the accuracy of generated answers in a dataset and saves the results.
+
+    This function loads a dataset from a JSON file, evaluates the accuracy of generated
+    answer samples against ground truth answers using the provided model configuration,
+    adds the accuracy results to the dataset, and saves the updated dataset to a new file.
+
+    Args:
+        input_file (str): Path to the input JSON file containing the dataset. The dataset must
+            follow the structure:
+            {
+                "data": {
+                    "<split_name>": [
+                        {
+                            "samples": [<predicted_answer_1>, <predicted_answer_2>, ...],
+                            "gt_answer": <ground_truth_answer>
+                        },
+                        ...
+                    ]
+                }
+            }
+        output_file (str): Path to the output file where the evaluated dataset will be saved.
+        model_name (str): The name of the model used for evaluation.
+        model_type (str): The type of model being evaluated (e.g., "openai", "hf").
+
+    Raises:
+        IOError: If there is an error reading the input file or writing the output file.
+    """
 
     # Initialize evaluator
     evaluator = AccuracyEvaluator(model_name=model_name, model_type=model_type)
@@ -16,7 +43,7 @@ def evaluate_dataset(
     try:
         with open(input_file, "r") as f:
             dataset = json.load(f)
-    except Exception as e:
+    except IOError as e:
         logger.error(f"Error loading input file {input_file}: {e}")
         raise
 
@@ -40,7 +67,7 @@ def evaluate_dataset(
         with open(output_file, "w") as f:
             json.dump(dataset, f, indent=2)
         logger.info(f"Saved evaluated dataset to {output_file}")
-    except Exception as e:
+    except IOError as e:
         logger.error(f"Error saving to output file {output_file}: {e}")
         raise
 

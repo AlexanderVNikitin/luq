@@ -6,18 +6,30 @@ from luq.utils import SeqProbMode
 
 
 class MaxProbabilityEstimator(BaseUQModel):
+    """Uncertainty estimator that uses the probability of the most likely sequence.
+
+    This class estimates uncertainty by computing the probability of each sequence in a set of samples,
+    and returning one minus the maximum probability, which serves as a measure of uncertainty.
+    """
     def estimate_uncertainty(
         self,
         samples: T.List[LLMOutput],
         seq_prob_mode: SeqProbMode = SeqProbMode.PROD,
         **kwargs,
     ) -> float:
-        """
-        Estimates uncertainty as one minus the probability of the most likely sequence in the list of samples.
+        """Estimate uncertainty from a list of LLM output samples.
 
-        :param prompt: The input prompt for LLM.
-        :param seq_prob_mode: Describes how token probabilities are translated into sequence probabilities
-        :return: entropy score
+        This method calculates the sequence probability for each sample using the specified
+        sequence probability mode and returns an uncertainty score equal to `1 - max(sequence_probs)`.
+
+        Args:
+            samples (List[LLMOutput]): A list of language model outputs with associated log probabilities.
+            seq_prob_mode (SeqProbMode, optional): Mode for aggregating token probabilities into
+                sequence probabilities (e.g., product or average). Defaults to `SeqProbMode.PROD`.
+            **kwargs: Additional keyword arguments (unused here but kept for compatibility).
+
+        Returns:
+            float: Uncertainty score, where higher values indicate more uncertainty.
         """
         assert all(s.logprobs is not None for s in samples.samples)
 

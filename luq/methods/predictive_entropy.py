@@ -1,5 +1,6 @@
 import torch
 import typing as T
+from typing import List
 
 from luq.models import LLMWrapper, LLMOutput
 from luq.methods.base_uq_model import BaseUQModel
@@ -8,11 +9,17 @@ from luq.utils import entropy, SeqProbMode
 
 class PredictiveEntropyEstimator(BaseUQModel):
     def generate_logits(self, prompt: str, num_samples: int = 10) -> T.List:
-        """
-        Generates multiple responses and extracts their logits.
+        """Generates multiple responses from the language model and extracts their logits.
 
-        :param prompt: The input prompt for the LLM.
-        :return: List of logit sequences.
+        Args:
+            prompt (str): The input prompt for the language model.
+            num_samples (int, optional): Number of samples to generate. Defaults to 10.
+
+        Returns:
+            List: A list of logit sequences corresponding to the generated samples.
+
+        Raises:
+            ValueError: If the internal language model is not an instance of LLMWrapper.
         """
         logit_samples = []
 
@@ -27,12 +34,14 @@ class PredictiveEntropyEstimator(BaseUQModel):
 
         return logit_samples
 
-    def compute_entropy(self, sequence_probs):
-        """
-        Computes entropy over the sampled sequence probabilities.
+    def compute_entropy(self, sequence_probs: torch.Tensor | List) -> float:
+        """Computes the entropy over a list of sequence probabilities.
 
-        :param sequence_probs: List of sequence probabilities.
-        :return: Entropy value.
+        Args:
+            sequence_probs (list or torch.Tensor): List or tensor of sequence probabilities.
+
+        Returns:
+            float: The entropy value computed from the normalized probability distribution.
         """
         if not isinstance(sequence_probs, torch.Tensor):
             sequence_probs = torch.tensor(sequence_probs)

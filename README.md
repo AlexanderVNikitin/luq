@@ -41,7 +41,9 @@ print(mp_estimator.estimate_uncertainty(samples))
 ```
 
 ## Tutorials
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/alexandervnikitin/luq/blob/main/tutorials/getting_started.ipynb) Introductory Tutorial [Getting started with LUQ](https://github.com/AlexanderVNikitin/luq/tutorials/getting_started.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/alexandervnikitin/luq/blob/main/tutorials/getting_started.ipynb) Introductory Tutorial [Getting started with LUQ](https://github.com/AlexanderVNikitin/luq/tutorials/getting_started.ipynb)  
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/alexandervnikitin/luq/blob/main/tutorials/luq_datasets.ipynb) Working with [LUQ Datasets](https://github.com/AlexanderVNikitin/luq/tutorials/luq_datasets.ipynb)
 
 
 ## Uncertainty Quantification Methods
