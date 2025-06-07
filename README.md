@@ -45,6 +45,8 @@ print(mp_estimator.estimate_uncertainty(samples))
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/alexandervnikitin/luq/blob/main/tutorials/luq_datasets.ipynb) Working with [LUQ Datasets](https://github.com/AlexanderVNikitin/luq/tutorials/luq_datasets.ipynb)
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/alexandervnikitin/luq/blob/main/tutorials/predictive_entropy.ipynb) Using [Predictive Entropy](https://github.com/AlexanderVNikitin/luq/tutorials/predictive_entropy.ipynb)
+
 
 ## Uncertainty Quantification Methods
 Generally the uncertainty quantification in LUQ sample multiple responses from an LLM and analyse the

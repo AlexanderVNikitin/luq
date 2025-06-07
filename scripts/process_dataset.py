@@ -1,3 +1,4 @@
+import os
 import json
 import argparse
 from pathlib import Path
@@ -38,7 +39,7 @@ def process_nq(input_file: Path) -> Dict[str, List[Dict[str, str]]]:
         result[split] = []
         for sample in cur_data:
             question = sample["question"]
-            context = sample["document"]["text"] if "document" in sample else sample.get("context", "")
+            context = sample["document"]["html"]
             answers = sample.get("answers", [])
             # Natural Questions can have multiple answers; we take the first if available
             if answers:
@@ -73,9 +74,12 @@ def main():
         choices=["coqa", "nq", "bioasq"],
         help="Dataset to process",
     )
-    parser.add_argument("--input", type=Path, required=False, help="Input file path")
+    parser.add_argument("--input", type=Path, required=False, help="Input file path", default="datasets")
     parser.add_argument("--output", type=Path, required=True, help="Output file path")
     args = parser.parse_args()
+
+    os.makedirs(args.output.parent, exist_ok=True)
+    os.makedirs(args.input, exist_ok=True)
 
     # Select processing function based on dataset
     processors = {"coqa": process_coqa, "nq": process_nq, "bioasq": process_bioasq}

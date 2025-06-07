@@ -71,7 +71,7 @@ def generate_samples(
         for _ in range(num_samples):
             output = model.generate(
                 input_ids=input_ids,
-                max_length=model.config.max_position_embeddings,
+                max_length=1024, # add to config
                 do_sample=True,
                 temperature=temperature,
                 top_p=top_p,
